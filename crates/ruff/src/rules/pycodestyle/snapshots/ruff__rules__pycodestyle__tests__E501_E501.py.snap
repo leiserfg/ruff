@@ -54,17 +54,4 @@ expression: diagnostics
     column: 105
   fix: ~
   parent: ~
-- kind:
-    name: LineTooLong
-    body: Line too long (129 > 88 characters)
-    suggestion: ~
-    fixable: false
-  location:
-    row: 61
-    column: 88
-  end_location:
-    row: 61
-    column: 129
-  fix: ~
-  parent: ~
 

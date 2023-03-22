@@ -1,5 +1,3 @@
-use once_cell::sync::Lazy;
-use regex::Regex;
 use rustpython_parser::ast::{Cmpop, Expr, ExprKind};
 use rustpython_parser::Tok;
 
@@ -20,8 +18,6 @@ pub fn compare(left: &Expr, ops: &[Cmpop], comparators: &[Expr], stylist: &Styli
         stylist,
     )
 }
-
-static URL_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^https?://\S+$").unwrap());
 
 pub fn is_overlong(
     line: &str,
@@ -47,12 +43,11 @@ pub fn is_overlong(
                 return false;
             }
         }
+    }
 
-        // Do not enforce the line length for commented lines that end with a URL
-        // or contain only a single word.
-        if chunks.last().map_or(true, |c| URL_REGEX.is_match(c)) {
-            return false;
-        }
+    // Do not enforce the line length for lines that end with a URL.
+    if chunks.last().unwrap_or(second).contains("://") {
+        return false;
     }
 
     true

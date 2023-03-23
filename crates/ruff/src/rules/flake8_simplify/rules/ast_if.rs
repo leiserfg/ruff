@@ -2,7 +2,7 @@ use log::error;
 use rustc_hash::FxHashSet;
 use rustpython_parser::ast::{Cmpop, Constant, Expr, ExprContext, ExprKind, Stmt, StmtKind};
 
-use ruff_diagnostics::{AutofixKind, Diagnostic, Fix, Violation};
+use ruff_diagnostics::{AutofixKind, Diagnostic, Edit, Violation};
 use ruff_macros::{derive_message_formats, violation};
 use ruff_python_ast::comparable::{ComparableConstant, ComparableExpr, ComparableStmt};
 use ruff_python_ast::helpers::{
@@ -355,7 +355,7 @@ pub fn needless_bool(checker: &mut Checker, stmt: &Stmt) {
     if fixable && checker.patch(diagnostic.kind.rule()) {
         if matches!(test.node, ExprKind::Compare { .. }) {
             // If the condition is a comparison, we can replace it with the condition.
-            diagnostic.amend(Fix::replacement(
+            diagnostic.amend(Edit::replacement(
                 unparse_stmt(
                     &create_stmt(StmtKind::Return {
                         value: Some(test.clone()),
@@ -368,7 +368,7 @@ pub fn needless_bool(checker: &mut Checker, stmt: &Stmt) {
         } else {
             // Otherwise, we need to wrap the condition in a call to `bool`. (We've already
             // verified, above, that `bool` is a builtin.)
-            diagnostic.amend(Fix::replacement(
+            diagnostic.amend(Edit::replacement(
                 unparse_stmt(
                     &create_stmt(StmtKind::Return {
                         value: Some(Box::new(create_expr(ExprKind::Call {
@@ -503,7 +503,7 @@ pub fn use_ternary_operator(checker: &mut Checker, stmt: &Stmt, parent: Option<&
         Range::from(stmt),
     );
     if fixable && checker.patch(diagnostic.kind.rule()) {
-        diagnostic.amend(Fix::replacement(
+        diagnostic.amend(Edit::replacement(
             contents,
             stmt.location,
             stmt.end_location.unwrap(),
@@ -852,7 +852,7 @@ pub fn use_dict_get_with_default(
         Range::from(stmt),
     );
     if fixable && checker.patch(diagnostic.kind.rule()) {
-        diagnostic.amend(Fix::replacement(
+        diagnostic.amend(Edit::replacement(
             contents,
             stmt.location,
             stmt.end_location.unwrap(),

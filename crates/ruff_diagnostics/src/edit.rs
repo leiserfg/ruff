@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Fix {
+pub struct Edit {
     pub content: String,
     pub location: Location,
     pub end_location: Location,
 }
 
-impl Fix {
+impl Edit {
     pub const fn deletion(start: Location, end: Location) -> Self {
         Self {
             content: String::new(),

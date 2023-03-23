@@ -6,7 +6,7 @@ use libcst_native::{
 use rustpython_parser::ast::{Expr, Keyword, Location};
 use rustpython_parser::{lexer, Mode, Tok};
 
-use ruff_diagnostics::Fix;
+use ruff_diagnostics::Edit;
 use ruff_python_ast::source_code::{Locator, Stylist};
 use ruff_python_ast::types::Range;
 
@@ -58,7 +58,7 @@ pub fn remove_class_def_base(
     expr_end: Location,
     bases: &[Expr],
     keywords: &[Keyword],
-) -> Option<Fix> {
+) -> Option<Edit> {
     if let Ok(fix) = remove_argument(locator, stmt_at, expr_at, expr_end, bases, keywords, true) {
         Some(fix)
     } else {
@@ -67,7 +67,7 @@ pub fn remove_class_def_base(
 }
 
 /// Generate a fix to remove arguments from a `super` call.
-pub fn remove_super_arguments(locator: &Locator, stylist: &Stylist, expr: &Expr) -> Option<Fix> {
+pub fn remove_super_arguments(locator: &Locator, stylist: &Stylist, expr: &Expr) -> Option<Edit> {
     let range = Range::from(expr);
     let contents = locator.slice(range);
 
@@ -94,7 +94,7 @@ pub fn remove_super_arguments(locator: &Locator, stylist: &Stylist, expr: &Expr)
     };
     tree.codegen(&mut state);
 
-    Some(Fix::replacement(
+    Some(Edit::replacement(
         state.to_string(),
         range.location,
         range.end_location,

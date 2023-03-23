@@ -1,5 +1,3 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use rustpython_parser::ast::Location;
 use rustpython_parser::Tok;
 
@@ -20,7 +18,6 @@ impl Violation for MissingWhitespaceAfterKeyword {
 }
 
 /// E275
-#[cfg(debug_assertions)]
 pub fn missing_whitespace_after_keyword(
     tokens: &[(Location, &Tok, Location)],
 ) -> Vec<(Location, DiagnosticKind)> {
@@ -41,11 +38,4 @@ pub fn missing_whitespace_after_keyword(
         }
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn missing_whitespace_after_keyword(
-    _tokens: &[(Location, &Tok, Location)],
-) -> Vec<(Location, DiagnosticKind)> {
-    vec![]
 }

@@ -79,7 +79,6 @@ mod tests {
         Ok(())
     }
 
-    #[cfg(debug_assertions)]
     #[test_case(Rule::IndentationWithInvalidMultiple, Path::new("E11.py"))]
     #[test_case(Rule::IndentationWithInvalidMultipleComment, Path::new("E11.py"))]
     #[test_case(Rule::MultipleLeadingHashesForBlockComment, Path::new("E26.py"))]

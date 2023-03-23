@@ -1,5 +1,3 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use ruff_diagnostics::DiagnosticKind;
 use ruff_diagnostics::Violation;
 use ruff_macros::{derive_message_formats, violation};
@@ -230,7 +228,6 @@ impl Violation for OverIndented {
 }
 
 /// E111, E114, E112, E113, E115, E116, E117
-#[cfg(debug_assertions)]
 pub fn indentation(
     logical_line: &LogicalLine,
     prev_logical_line: Option<&LogicalLine>,
@@ -282,16 +279,4 @@ pub fn indentation(
         }
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn indentation(
-    _logical_line: &LogicalLine,
-    _prev_logical_line: Option<&LogicalLine>,
-    _indent_char: char,
-    _indent_level: usize,
-    _prev_indent_level: Option<usize>,
-    _indent_size: usize,
-) -> Vec<(usize, DiagnosticKind)> {
-    vec![]
 }

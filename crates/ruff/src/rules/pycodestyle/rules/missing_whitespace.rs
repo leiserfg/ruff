@@ -1,10 +1,7 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use itertools::Itertools;
 use rustpython_parser::ast::Location;
 
 use ruff_diagnostics::Fix;
-use ruff_diagnostics::Violation;
 use ruff_diagnostics::{AlwaysAutofixableViolation, Diagnostic};
 use ruff_macros::{derive_message_formats, violation};
 use ruff_python_ast::types::Range;
@@ -28,7 +25,6 @@ impl AlwaysAutofixableViolation for MissingWhitespace {
 }
 
 /// E231
-#[cfg(debug_assertions)]
 pub fn missing_whitespace(
     line: &str,
     row: usize,
@@ -84,14 +80,4 @@ pub fn missing_whitespace(
         }
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn missing_whitespace(
-    _line: &str,
-    _row: usize,
-    _autofix: bool,
-    indent_level: usize,
-) -> Vec<Diagnostic> {
-    vec![]
 }

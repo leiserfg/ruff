@@ -1,5 +1,3 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use once_cell::sync::Lazy;
 use regex::Regex;
 use rustpython_parser::ast::Location;
@@ -9,7 +7,6 @@ use ruff_diagnostics::DiagnosticKind;
 use ruff_diagnostics::Violation;
 use ruff_macros::{derive_message_formats, violation};
 
-#[cfg(debug_assertions)]
 use crate::rules::pycodestyle::helpers::is_op_token;
 
 #[violation]
@@ -36,7 +33,6 @@ static STARTSWITH_DEF_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^(async\s+def|def)\b").unwrap());
 
 /// E251, E252
-#[cfg(debug_assertions)]
 pub fn whitespace_around_named_parameter_equals(
     tokens: &[(Location, &Tok, Location)],
     line: &str,
@@ -102,12 +98,4 @@ pub fn whitespace_around_named_parameter_equals(
         prev_end = Some(end);
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn whitespace_around_named_parameter_equals(
-    _tokens: &[(Location, &Tok, Location)],
-    _line: &str,
-) -> Vec<(Location, DiagnosticKind)> {
-    vec![]
 }

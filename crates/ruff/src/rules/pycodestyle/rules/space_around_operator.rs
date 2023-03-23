@@ -1,5 +1,3 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -127,7 +125,6 @@ static OPERATOR_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"[^,\s](\s*)(?:[-+*/|!<=>%&^]+|:=)(\s*)").unwrap());
 
 /// E221, E222, E223, E224
-#[cfg(debug_assertions)]
 pub fn space_around_operator(line: &str) -> Vec<(usize, DiagnosticKind)> {
     let mut diagnostics = vec![];
     for line_match in OPERATOR_REGEX.captures_iter(line) {
@@ -147,9 +144,4 @@ pub fn space_around_operator(line: &str) -> Vec<(usize, DiagnosticKind)> {
         }
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn space_around_operator(_line: &str) -> Vec<(usize, DiagnosticKind)> {
-    vec![]
 }

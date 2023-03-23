@@ -1,5 +1,3 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use rustpython_parser::ast::Location;
 use rustpython_parser::Tok;
 
@@ -7,7 +5,6 @@ use ruff_diagnostics::{AlwaysAutofixableViolation, Diagnostic, Fix};
 use ruff_macros::{derive_message_formats, violation};
 use ruff_python_ast::types::Range;
 
-use crate::registry::AsRule;
 use crate::rules::pycodestyle::helpers::{is_keyword_token, is_op_token, is_soft_keyword_token};
 
 #[violation]
@@ -29,7 +26,6 @@ impl AlwaysAutofixableViolation for WhitespaceBeforeParameters {
 }
 
 /// E211
-#[cfg(debug_assertions)]
 pub fn whitespace_before_parameters(
     tokens: &[(Location, &Tok, Location)],
     autofix: bool,
@@ -64,12 +60,4 @@ pub fn whitespace_before_parameters(
         prev_end = *end;
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn whitespace_before_parameters(
-    _tokens: &[(Location, &Tok, Location)],
-    _autofix: bool,
-) -> Vec<Diagnostic> {
-    vec![]
 }

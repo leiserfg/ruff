@@ -1,5 +1,3 @@
-#![allow(dead_code, unused_imports, unused_variables)]
-
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -106,7 +104,6 @@ static EXTRANEOUS_WHITESPACE_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"([\[({][ \t]|[ \t][]}),;:])").unwrap());
 
 /// E201, E202, E203
-#[cfg(debug_assertions)]
 pub fn extraneous_whitespace(line: &str) -> Vec<(usize, DiagnosticKind)> {
     let mut diagnostics = vec![];
     for line_match in EXTRANEOUS_WHITESPACE_REGEX.captures_iter(line) {
@@ -125,9 +122,4 @@ pub fn extraneous_whitespace(line: &str) -> Vec<(usize, DiagnosticKind)> {
         }
     }
     diagnostics
-}
-
-#[cfg(not(debug_assertions))]
-pub fn extraneous_whitespace(_line: &str) -> Vec<(usize, DiagnosticKind)> {
-    vec![]
 }

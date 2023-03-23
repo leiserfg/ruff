@@ -14,67 +14,36 @@ pub use rule_set::{RuleSet, RuleSetIterator};
 ruff_macros::register_rules!(
     // pycodestyle errors
     rules::pycodestyle::rules::MixedSpacesAndTabs,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::IndentationWithInvalidMultiple,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::NoIndentedBlock,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::UnexpectedIndentation,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::IndentationWithInvalidMultipleComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::NoIndentedBlockComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::UnexpectedIndentationComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::OverIndented,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::WhitespaceAfterOpenBracket,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::WhitespaceBeforeCloseBracket,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::WhitespaceBeforePunctuation,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MultipleSpacesBeforeOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MultipleSpacesAfterOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::TabBeforeOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::TabAfterOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::TooFewSpacesBeforeInlineComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::NoSpaceAfterInlineComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::NoSpaceAfterBlockComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MultipleLeadingHashesForBlockComment,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MultipleSpacesAfterKeyword,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespace,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespaceAfterKeyword,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MultipleSpacesBeforeKeyword,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespaceAroundOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespaceAroundArithmeticOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespaceAroundBitwiseOrShiftOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespaceAroundModuloOperator,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::TabAfterKeyword,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::UnexpectedSpacesAroundKeywordParameterEquals,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::MissingWhitespaceAroundParameterEquals,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::WhitespaceBeforeParameters,
-    #[cfg(debug_assertions)]
     rules::pycodestyle::rules::TabBeforeKeyword,
     rules::pycodestyle::rules::MultipleImportsOnOneLine,
     rules::pycodestyle::rules::ModuleImportNotAtTopOfFile,
@@ -906,7 +875,6 @@ impl Rule {
             Rule::IOError => LintSource::Io,
             Rule::UnsortedImports | Rule::MissingRequiredImport => LintSource::Imports,
             Rule::ImplicitNamespacePackage | Rule::InvalidModuleName => LintSource::Filesystem,
-            #[cfg(debug_assertions)]
             Rule::IndentationWithInvalidMultiple
             | Rule::IndentationWithInvalidMultipleComment
             | Rule::MissingWhitespace

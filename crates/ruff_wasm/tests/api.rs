@@ -30,7 +30,7 @@ fn empty_config() {
             message: "If test is a tuple, which is always `True`".to_string(),
             location: Location::new(1, 0),
             end_location: Location::new(2, 8),
-            fix: None,
+            fix: Fix::empty(),
         }]
     );
 }

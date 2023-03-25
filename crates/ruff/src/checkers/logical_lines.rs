@@ -43,16 +43,11 @@ pub fn check_logical_lines(
 ) -> Vec<Diagnostic> {
     let mut diagnostics = vec![];
 
-    let indent_char = stylist.indentation().as_char();
     let mut prev_line = None;
     let mut prev_indent_level = None;
-    for line in &LogicalLines::from_tokens(tokens, locator) {
-        // Extract the indentation level.
-        let Some(start_loc) = line.first_token_location() else { continue; };
-        let start_line = locator.slice(Range::new(Location::new(start_loc.row(), 0), *start_loc));
-        let indent_level = expand_indent(start_line);
-        let indent_size = 4;
+    let indent_char = stylist.indentation().as_char();
 
+    for line in &LogicalLines::from_tokens(tokens, locator) {
         if line.flags().contains(TokenFlags::OPERATOR) {
             for (location, kind) in space_around_operator(line.tokens(), locator) {
                 if settings.rules.enabled(kind.rule()) {
@@ -150,9 +145,7 @@ pub fn check_logical_lines(
             #[cfg(not(feature = "logical_lines"))]
             let should_fix = false;
 
-            for diagnostic in
-                missing_whitespace(line.text(), start_loc.row(), should_fix, indent_level)
-            {
+            for diagnostic in missing_whitespace(line.tokens(), locator, should_fix) {
                 if settings.rules.enabled(diagnostic.kind.rule()) {
                     diagnostics.push(diagnostic);
                 }
@@ -174,7 +167,13 @@ pub fn check_logical_lines(
             }
         }
 
-        for (index, kind) in indentation(
+        // Extract the indentation level.
+        let Some(start_loc) = line.first_token_location() else { continue; };
+        let start_line = locator.slice(Range::new(Location::new(start_loc.row(), 0), start_loc));
+        let indent_level = expand_indent(start_line);
+        let indent_size = 4;
+
+        for (location, kind) in indentation(
             &line,
             prev_line.as_ref(),
             indent_char,
@@ -182,8 +181,6 @@ pub fn check_logical_lines(
             prev_indent_level,
             indent_size,
         ) {
-            let (token_offset, pos) = line.mapping(index);
-            let location = Location::new(pos.row(), pos.column() + index - token_offset);
             if settings.rules.enabled(kind.rule()) {
                 diagnostics.push(Diagnostic {
                     kind,
@@ -195,7 +192,7 @@ pub fn check_logical_lines(
             }
         }
 
-        if !line.is_comment() {
+        if !line.is_comment_only() {
             prev_line = Some(line);
             prev_indent_level = Some(indent_level);
         }
@@ -221,7 +218,7 @@ z = x + 1"#;
         let locator = Locator::new(contents);
         let actual: Vec<String> = LogicalLines::from_tokens(&lxr, &locator)
             .into_iter()
-            .map(|line| line.text().to_string())
+            .map(|line| line.text_trimmed().to_string())
             .collect();
         let expected = vec![
             "x = 1".to_string(),
@@ -242,10 +239,10 @@ z = x + 1"#;
         let locator = Locator::new(contents);
         let actual: Vec<String> = LogicalLines::from_tokens(&lxr, &locator)
             .into_iter()
-            .map(|line| line.text().to_string())
+            .map(|line| line.text_trimmed().to_string())
             .collect();
         let expected = vec![
-            "x = [1, 2, 3, ]".to_string(),
+            "x = [\n  1,\n  2,\n  3,\n]".to_string(),
             "y = 2".to_string(),
             "z = x + 1".to_string(),
         ];
@@ -256,9 +253,9 @@ z = x + 1"#;
         let locator = Locator::new(contents);
         let actual: Vec<String> = LogicalLines::from_tokens(&lxr, &locator)
             .into_iter()
-            .map(|line| line.text().to_string())
+            .map(|line| line.text_trimmed().to_string())
             .collect();
-        let expected = vec!["x = \"xxx\"".to_string()];
+        let expected = vec!["x = 'abc'".to_string()];
         assert_eq!(actual, expected);
 
         let contents = r#"
@@ -269,7 +266,7 @@ f()"#;
         let locator = Locator::new(contents);
         let actual: Vec<String> = LogicalLines::from_tokens(&lxr, &locator)
             .into_iter()
-            .map(|line| line.text().to_string())
+            .map(|line| line.text_trimmed().to_string())
             .collect();
         let expected = vec!["def f():", "x = 1", "f()"];
         assert_eq!(actual, expected);
@@ -284,9 +281,15 @@ f()"#;
         let locator = Locator::new(contents);
         let actual: Vec<String> = LogicalLines::from_tokens(&lxr, &locator)
             .into_iter()
-            .map(|line| line.text().to_string())
+            .map(|line| line.text_trimmed().to_string())
             .collect();
-        let expected = vec!["def f():", "\"xxxxxxxxxxxxxxxxxxxx\"", "", "x = 1", "f()"];
+        let expected = vec![
+            "def f():",
+            "\"\"\"Docstring goes here.\"\"\"",
+            "",
+            "x = 1",
+            "f()",
+        ];
         assert_eq!(actual, expected);
     }
 }

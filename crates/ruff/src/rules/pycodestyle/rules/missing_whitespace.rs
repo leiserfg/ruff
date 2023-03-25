@@ -3,10 +3,14 @@
 use itertools::Itertools;
 use rustpython_parser::ast::Location;
 
+use crate::rules::pycodestyle::logical_lines::LogicalLineTokens;
+use crate::rules::pycodestyle::rules::Whitespace;
 use ruff_diagnostics::Edit;
 use ruff_diagnostics::Violation;
 use ruff_diagnostics::{AlwaysAutofixableViolation, Diagnostic};
 use ruff_macros::{derive_message_formats, violation};
+use ruff_python_ast::source_code::Locator;
+use ruff_python_ast::token_kind::TokenKind;
 use ruff_python_ast::types::Range;
 
 #[violation]
@@ -30,10 +34,9 @@ impl AlwaysAutofixableViolation for MissingWhitespace {
 /// E231
 #[cfg(feature = "logical_lines")]
 pub fn missing_whitespace(
-    line: &str,
-    row: usize,
+    tokens: LogicalLineTokens,
+    locator: &Locator,
     autofix: bool,
-    indent_level: usize,
 ) -> Vec<Diagnostic> {
     let mut diagnostics = vec![];
 
@@ -41,49 +44,58 @@ pub fn missing_whitespace(
     let mut num_rsqb = 0u32;
     let mut prev_lsqb = None;
     let mut prev_lbrace = None;
-    for (idx, (char, next_char)) in line.chars().tuple_windows().enumerate() {
-        match char {
-            '[' => {
+
+    for (token, next_token) in tokens.iter().tuple_windows() {
+        let kind = token.kind();
+        match kind {
+            TokenKind::Lsqb => {
                 num_lsqb += 1;
-                prev_lsqb = Some(idx);
+                prev_lsqb = Some(token.start());
             }
-            ']' => {
+            TokenKind::Rsqb => {
                 num_rsqb += 1;
             }
-            '{' => {
-                prev_lbrace = Some(idx);
+            TokenKind::Lbrace => {
+                prev_lbrace = Some(token.start());
             }
 
-            ',' | ';' | ':' if !next_char.is_whitespace() => {
-                if char == ':' && num_lsqb > num_rsqb && prev_lsqb > prev_lbrace {
-                    continue; // Slice syntax, no space required
-                }
-                if char == ',' && matches!(next_char, ')' | ']') {
-                    continue; // Allow tuple with only one element: (3,)
-                }
-                if char == ':' && next_char == '=' {
-                    continue; // Allow assignment expression
-                }
+            TokenKind::Comma | TokenKind::Semi | TokenKind::Colon => {
+                let (start, end) = token.range();
 
-                let kind = MissingWhitespace {
-                    token: char.to_string(),
-                };
+                let end_offset = locator.offset(end);
+                let after = &locator.contents()[end_offset..];
 
-                let mut diagnostic = Diagnostic::new(
-                    kind,
-                    Range::new(
-                        Location::new(row, indent_level + idx),
-                        Location::new(row, indent_level + idx),
-                    ),
-                );
+                if !after.chars().next().map_or(false, |c| c.is_whitespace()) {
+                    match (kind, next_token.kind()) {
+                        (TokenKind::Colon, _) if num_lsqb > num_rsqb && prev_lsqb > prev_lbrace => {
+                            continue; // Slice syntax, no space required
+                        }
+                        (TokenKind::Comma, TokenKind::Rpar | TokenKind::Rsqb) => {
+                            continue; // Allow tuple with only one element: (3,)
+                        }
+                        (TokenKind::Colon, TokenKind::Equal) => {
+                            continue; // Allow assignment expression
+                        }
+                        _ => {}
+                    }
 
-                if autofix {
-                    diagnostic.amend(Edit::insertion(
-                        " ".to_string(),
-                        Location::new(row, indent_level + idx + 1),
-                    ));
+                    let kind = MissingWhitespace {
+                        token: match kind {
+                            TokenKind::Comma => ",",
+                            TokenKind::Semi => ";",
+                            TokenKind::Colon => ":",
+                            _ => unreachable!(),
+                        }
+                        .to_string(),
+                    };
+
+                    let mut diagnostic = Diagnostic::new(kind, Range::new(start, start));
+
+                    if autofix {
+                        diagnostic.amend(Edit::insertion(" ".to_string(), end));
+                    }
+                    diagnostics.push(diagnostic);
                 }
-                diagnostics.push(diagnostic);
             }
             _ => {}
         }
@@ -93,10 +105,9 @@ pub fn missing_whitespace(
 
 #[cfg(not(feature = "logical_lines"))]
 pub fn missing_whitespace(
-    _line: &str,
-    _row: usize,
+    tokens: LogicalLineTokens,
+    locator: &Locator,
     _autofix: bool,
-    indent_level: usize,
 ) -> Vec<Diagnostic> {
     vec![]
 }
